@@ -1,0 +1,60 @@
+{% for car in page_obj %}
+<div class="bg-[#1a1a1a] rounded-xl overflow-hidden shadow-xl border border-gray-800 hover:border-gray-600 transition duration-300 group flex flex-col">
+    <div class="relative h-56 overflow-hidden">
+        {% if car.image %}
+            <img src="{{ car.image.url }}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+        {% else %}
+            <div class="w-full h-full bg-gray-800 flex items-center justify-center text-gray-500">Sem Foto</div>
+        {% endif %}
+        <div class="absolute top-4 left-4 flex flex-wrap gap-2">
+            {% if car.segment %}
+                <span class="bg-luxx_accent text-black text-[10px] font-bold px-3 py-1 rounded uppercase tracking-wider shadow-lg">{{ car.get_segment_display }}</span>
+            {% endif %}
+            {% if car.body_type %}
+                <span class="bg-black/80 backdrop-blur border border-gray-700 text-white text-[10px] font-bold px-3 py-1 rounded uppercase tracking-wider shadow-lg">{{ car.get_body_type_display }}</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="p-6 flex flex-col flex-grow">
+        <div class="flex justify-between items-start mb-4">
+            <div class="w-full">
+                <h3 class="text-xl font-bold text-white">{{ car.brand.name }} {{ car.model_name }}</h3>
+                <p class="text-gray-400 text-sm mt-1">Ano {{ car.year|stringformat:"d" }}</p>
+            </div>
+        </div>
+        <div class="flex space-x-3 mb-6 mt-4 text-xs text-gray-300">
+            <span class="bg-[#242424] py-1.5 px-3 rounded-md">{{ car.horsepower }} cv</span>
+            <span class="bg-[#242424] py-1.5 px-3 rounded-md">{{ car.get_transmission_display }}</span>
+            <span class="bg-[#242424] py-1.5 px-3 rounded-md">{{ car.seats }} Assentos</span>
+        </div>
+        <div class="mt-auto flex items-end justify-between border-t border-gray-800 pt-4">
+            <div>
+                <p class="text-gray-500 text-xs mb-1">Preço de Venda</p>
+                <span class="text-2xl font-bold text-white">R$ {{ car.price|floatformat:2 }}</span>
+            </div>
+            <a href="{% url 'carro_detalhes' car.id %}" class="bg-white text-black font-bold py-2 px-6 rounded-lg hover:bg-luxx_accent transition">
+            Ver Detalhes
+            </a>
+        </div>
+    </div>
+</div>
+{% empty %}
+    {% if page_obj.number == 1 %}
+    <div class="col-span-full text-center py-20 bg-luxx_card rounded-xl border border-gray-800">
+        <svg class="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <h3 class="text-xl font-bold text-white mb-2">Nenhum veículo encontrado</h3>
+        <p class="text-gray-400">Tente ajustar a sua pesquisa ou os filtros.</p>
+    </div>
+    {% endif %}
+{% endfor %}
+
+{% if page_obj.has_next %}
+<div id="load-more-container" class="col-span-full flex justify-center mt-10">
+    <button hx-get="{% url 'catalogo_veiculos' %}?page={{ page_obj.next_page_number }}&q={{ query }}&body_type={{ active_body }}&segment={{ active_segment }}"
+            hx-target="#load-more-container"
+            hx-swap="outerHTML"
+            class="border border-gray-600 bg-[#121212] text-white font-bold py-3 px-8 rounded-full hover:bg-white hover:text-black transition cursor-pointer shadow-lg">
+        Carregar Mais Veículos
+    </button>
+</div>
+{% endif %}

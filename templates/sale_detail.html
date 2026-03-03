@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 pt-32 pb-16">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <a href="{% url 'dashboard' %}" class="text-luxx_accent text-sm hover:underline flex items-center mb-2"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Voltar ao Dashboard</a>
+            <h1 class="text-3xl font-bold text-white">Pedido #{{ venda.id }}</h1>
+            <p class="text-gray-400">Criado em {{ venda.created_at|date:"d/m/Y H:i" }} ({{ venda.created_at|naturaltime }})</p>
+        </div>
+        <div>
+            {% if venda.status == 'PENDING' %}
+                <span class="bg-yellow-900/50 text-yellow-500 border border-yellow-700 py-2 px-4 rounded-lg text-sm font-bold uppercase">Pendente</span>
+            {% elif venda.status == 'APPROVED' %}
+                <span class="bg-green-900/50 text-green-400 border border-green-700 py-2 px-4 rounded-lg text-sm font-bold uppercase">Aprovado</span>
+            {% else %}
+                <span class="bg-red-900/50 text-red-400 border border-red-700 py-2 px-4 rounded-lg text-sm font-bold uppercase">Cancelado</span>
+            {% endif %}
+        </div>
+    </div>
+
+    </div>
+{% endblock %}

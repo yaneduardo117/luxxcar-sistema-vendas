@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    main.p-6 { padding: 0 !important; }
+</style>
+
+<div class="relative w-full h-[60vh] flex flex-col justify-end bg-cover bg-center"
+     style="background-image: url('{% if car.image %}{{ car.image.url }}{% else %}https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=1920&auto=format&fit=crop{% endif %}');">
+
+    <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-black/50 to-transparent"></div>
+
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12 flex flex-col md:flex-row md:items-end justify-between">
+        <div>
+            <div class="text-xs text-gray-400 font-bold tracking-widest uppercase mb-3 flex items-center space-x-2">
+                <a href="/" class="hover:text-luxx_accent transition">Início</a>
+                <span>/</span>
+                <span class="text-luxx_accent">{{ car.get_segment_display|default:"Veículo" }}</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold text-white mb-2">{{ car.brand.name }} {{ car.model_name }}</h1>
+
+            <p class="text-gray-300 text-lg">{{ car.get_body_type_display|default:"Padrão" }} · {{ car.brand.name }} · {{ car.year|stringformat:"d" }}</p>
+        </div>
+
+        <div class="mt-6 md:mt-0 text-right">
+            <p class="text-gray-400 text-sm mb-1 uppercase tracking-widest">Preço de Venda</p>
+            <div class="flex items-end justify-end space-x-2">
+                <span class="text-4xl font-bold text-white">R$ {{ car.price|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-3 gap-16 relative">
+
+    <div class="lg:col-span-2 space-y-16">
+
+        <div>
+            <span class="text-luxx_accent text-xs font-bold tracking-widest uppercase mb-6 block">— ESPECIFICAÇÕES PRINCIPAIS</span>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+                <div class="bg-luxx_card border border-gray-800 rounded-xl p-5 flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs font-bold">Potência</p>
+                        <p class="text-white font-semibold">{{ car.horsepower }} cv</p>
+                    </div>
+                </div>
+
+                <div class="bg-luxx_card border border-gray-800 rounded-xl p-5 flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs font-bold">0-100 km/h</p>
+                        <p class="text-white font-semibold">{{ car.zero_to_hundred }} Segundos</p>
+                    </div>
+                </div>
+
+                <div class="bg-luxx_card border border-gray-800 rounded-xl p-5 flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs font-bold">Assentos</p>
+                        <p class="text-white font-semibold">{{ car.seats }} Lugares</p>
+                    </div>
+                </div>
+
+                <div class="bg-luxx_card border border-gray-800 rounded-xl p-5 flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs font-bold">Câmbio</p>
+                        <p class="text-white font-semibold">{{ car.get_transmission_display }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-luxx_card border border-gray-800 rounded-xl p-5 flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs font-bold">Ano</p>
+                        <p class="text-white font-semibold">{{ car.year|stringformat:"d" }}</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div>
+            <span class="text-luxx_accent text-xs font-bold tracking-widest uppercase mb-6 block">— VISÃO GERAL & GALERIA</span>
+
+            <p class="text-gray-400 leading-relaxed mb-8 text-sm">
+                Uma obra de arte sobre rodas. O {{ car.brand.name }} {{ car.model_name }} oferece uma experiência de condução incomparável, combinando engenharia de ponta com um design deslumbrante. Este veículo em nosso estoque passou por uma rigorosa inspeção de qualidade para garantir que você receba o melhor que o mercado de luxo tem a oferecer.
+            </p>
+
+            {% if car.galeria.all %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for foto in car.galeria.all %}
+                        <div class="rounded-xl overflow-hidden h-64 border border-gray-800">
+                            <img src="{{ foto.image.url }}" alt="Galeria {{ car.model_name }}" class="w-full h-full object-cover hover:scale-110 transition duration-700">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-luxx_card border border-gray-800 rounded-xl p-8 text-center">
+                    <p class="text-gray-500 text-sm">Nenhuma foto adicional na galeria deste veículo.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="lg:col-span-1">
+        <div class="sticky top-32 bg-luxx_card border border-gray-800 rounded-2xl p-8 shadow-2xl">
+            <h3 class="text-2xl font-bold text-white mb-2">Compre este carro agora</h3>
+            <p class="text-gray-400 text-sm mb-8">Preencha o formulário para iniciar o processo de venda com segurança.</p>
+
+            <div class="flex justify-between items-center border-b border-gray-800 pb-4 mb-6 text-sm">
+                <span class="text-gray-400">Preço do Veículo</span>
+                <span class="text-white font-bold text-lg">R$ {{ car.price|floatformat:2 }}</span>
+            </div>
+
+            {% if user.is_authenticated %}
+                <form action="{% url 'checkout_prep' car.id %}" method="POST" class="space-y-4">
+                    {% csrf_token %}
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Nome Completo</label>
+                        <input type="text" name="nome" value="{{ user.get_full_name|default:user.username }}" required placeholder="Seu nome" class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-luxx_accent focus:ring-1 focus:ring-luxx_accent transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Telefone / WhatsApp</label>
+                        <input type="text" name="telefone" required placeholder="(DD) 99999-9999" class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-luxx_accent focus:ring-1 focus:ring-luxx_accent transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">E-mail</label>
+                        <input type="email" name="email" value="{{ user.email }}" required placeholder="seu@email.com" class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-luxx_accent focus:ring-1 focus:ring-luxx_accent transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Pagamento Desejado</label>
+                        <select name="pagamento" required class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-luxx_accent transition cursor-pointer">
+                            <option value="TED">Transferência Bancária (TED/DOC)</option>
+                            <option value="PIX">Pix (Desconto de 5%)</option>
+                            <option value="FINANCE">Financiamento Bancário</option>
+                            <option value="CREDIT">Cartão de Crédito (Até 12x)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-white text-black font-bold py-4 rounded-lg hover:bg-luxx_accent transition mt-4 cursor-pointer">
+                        Revisar e Continuar
+                    </button>
+                </form>
+            {% else %}
+                <div class="bg-[#121212] border border-gray-700 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center mx-auto text-gray-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <p class="text-gray-300 text-sm font-medium">Acesso Restrito</p>
+                    <p class="text-gray-500 text-xs">Para garantir a segurança da transação, faça login ou crie uma conta para reservar este veículo.</p>
+
+                    <div class="pt-2 space-y-3">
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="block w-full bg-luxx_accent text-black font-bold py-3 rounded-lg hover:bg-yellow-500 transition cursor-pointer">
+                            Fazer Login
+                        </a>
+                        <a href="{% url 'cadastro' %}?next={{ request.path }}" class="block w-full bg-transparent border border-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            Criar Conta
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <ul class="mt-8 space-y-3 text-sm text-gray-400">
+                <li class="flex items-center space-x-3">
+                    <svg class="w-4 h-4 text-luxx_accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Transação 100% segura e criptografada</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <svg class="w-4 h-4 text-luxx_accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Consultoria VIP inclusa</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <svg class="w-4 h-4 text-luxx_accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Entrega disponível para todo o Brasil</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

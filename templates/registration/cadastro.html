@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center py-12"
+     x-data="{
+         senha: '',
+         get temLetraNumero() { return /[a-zA-Z]/.test(this.senha) && /[0-9]/.test(this.senha); },
+         get temEspecial() { return /[@#%&!*^~?]/.test(this.senha); },
+         get tamanhoValido() { return this.senha.length >= 8; },
+         get temMaiusculaMinuscula() { return /[A-Z]/.test(this.senha) && /[a-z]/.test(this.senha); },
+         get semRepeticao() { return this.senha.length > 0 && !/(.)\1\1/.test(this.senha); },
+         get semSequenciaOuEspaco() {
+             if (this.senha.length === 0) return false;
+             if (this.senha.includes(' ')) return false;
+             const seq = ['123', '234', '345', '456', '567', '678', '789', '890', 'abc', 'bcd', 'cde', 'def', 'efg', 'fgh', 'ghi', 'hij', 'ijk', 'jkl', 'klm', 'lmn', 'mno', 'nop', 'opq', 'pqr', 'qrs', 'rst', 'stu', 'tuv', 'uvw', 'vwx', 'wxy', 'xyz'];
+             let lower = this.senha.toLowerCase();
+             for (let s of seq) { if (lower.includes(s)) return false; }
+             return true;
+         },
+         get tudoValido() {
+             return this.temLetraNumero && this.temEspecial && this.tamanhoValido &&
+                    this.temMaiusculaMinuscula && this.semRepeticao && this.semSequenciaOuEspaco;
+         }
+     }">
+
+    <div class="bg-luxx_card p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-800">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Criar Conta</h2>
+            <p class="text-gray-400 text-sm">Preencha os dados e crie uma senha segura.</p>
+        </div>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            {% for field in form %}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">{{ field.label }}</label>
+
+                {% if field.name == 'password1' %}
+                    <div class="relative" x-data="{ mostrarSenha1: false }">
+                        {% render_field field x-model="senha" x-ref="senhaInput1" class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-luxx_accent focus:ring-1 focus:ring-luxx_accent transition pr-12" placeholder="••••••••" %}
+
+                        <button type="button" @click="mostrarSenha1 = !mostrarSenha1; $refs.senhaInput1.type = mostrarSenha1 ? 'text' : 'password'" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-white transition cursor-pointer">
+                            <svg x-show="!mostrarSenha1" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <svg x-show="mostrarSenha1" style="display: none;" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                        </button>
+                    </div>
+
+                    <div class="mt-4 p-4 bg-[#121212] border border-gray-800 rounded-lg space-y-2">
+                        <div class="flex items-center space-x-2 text-xs transition-colors duration-300" :class="temLetraNumero ? 'text-green-500' : 'text-gray-500'">
+                            <svg x-show="temLetraNumero" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg x-show="!temLetraNumero" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span>Combine letras e números. Ex.: W1</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs transition-colors duration-300" :class="temEspecial ? 'text-green-500' : 'text-gray-500'">
+                            <svg x-show="temEspecial" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg x-show="!temEspecial" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span>Use caracteres especiais. Ex.: @#%</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs transition-colors duration-300" :class="tamanhoValido ? 'text-green-500' : 'text-gray-500'">
+                            <svg x-show="tamanhoValido" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg x-show="!tamanhoValido" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span>Use pelo menos 8 caracteres</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs transition-colors duration-300" :class="temMaiusculaMinuscula ? 'text-green-500' : 'text-gray-500'">
+                            <svg x-show="temMaiusculaMinuscula" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg x-show="!temMaiusculaMinuscula" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span>Use letras maiúsculas e minúsculas</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs transition-colors duration-300" :class="semRepeticao ? 'text-green-500' : 'text-gray-500'">
+                            <svg x-show="semRepeticao" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg x-show="!semRepeticao" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span>Não repita caracteres consecutivos. Ex.: AAA</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs transition-colors duration-300" :class="semSequenciaOuEspaco ? 'text-green-500' : 'text-gray-500'">
+                            <svg x-show="semSequenciaOuEspaco" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg x-show="!semSequenciaOuEspaco" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span>Não utilize espaços ou sequências (ex: ABC, 123)</span>
+                        </div>
+                    </div>
+
+                {% elif field.name == 'password2' %}
+                    <div class="relative" x-data="{ mostrarSenha2: false }">
+                        {% render_field field x-ref="senhaInput2" class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-luxx_accent focus:ring-1 focus:ring-luxx_accent transition pr-12" placeholder="••••••••" %}
+
+                        <button type="button" @click="mostrarSenha2 = !mostrarSenha2; $refs.senhaInput2.type = mostrarSenha2 ? 'text' : 'password'" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-white transition cursor-pointer">
+                            <svg x-show="!mostrarSenha2" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <svg x-show="mostrarSenha2" style="display: none;" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                        </button>
+                    </div>
+
+                {% else %}
+                    {% render_field field class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-luxx_accent focus:ring-1 focus:ring-luxx_accent transition" %}
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <button type="submit"
+                    :disabled="!tudoValido"
+                    :class="tudoValido ? 'bg-luxx_accent text-black hover:bg-yellow-500 cursor-pointer' : 'bg-gray-800 text-gray-500 cursor-not-allowed'"
+                    class="w-full font-bold py-3 px-4 rounded-lg transition duration-200 mt-6">
+                Cadastrar
+            </button>
+        </form>
+
+        <div class="mt-8 flex items-center justify-between">
+            <span class="border-b border-gray-700 w-1/5 lg:w-1/4"></span>
+            <a href="#" class="text-xs text-center text-gray-500 uppercase tracking-widest">ou entre com</a>
+            <span class="border-b border-gray-700 w-1/5 lg:w-1/4"></span>
+        </div>
+
+        <div class="flex gap-4 mt-6">
+            <button type="button" class="w-full flex items-center justify-center py-2 px-4 border border-gray-700 rounded-lg hover:bg-gray-800 transition">
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
+            </button>
+            <button type="button" class="w-full flex items-center justify-center py-2 px-4 border border-gray-700 rounded-lg hover:bg-gray-800 transition">
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.79 3.59-.79 1.54.04 2.83.67 3.56 1.7-2.97 1.84-2.46 5.86.37 7.02-.75 1.76-1.55 3.25-2.6 4.24zM12.03 7.25C11.83 4.2 14.28 1.5 17.2 1.4c.26 3.16-2.73 5.91-5.17 5.85z"/></svg>
+            </button>
+            <button type="button" class="w-full flex items-center justify-center py-2 px-4 border border-gray-700 rounded-lg hover:bg-gray-800 transition">
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </button>
+        </div>
+
+        <div class="mt-8 text-center text-sm">
+            <span class="text-gray-400">Já tem uma conta?</span>
+            <a href="{% url 'login' %}" class="text-luxx_accent hover:underline ml-1 font-bold">Faça Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

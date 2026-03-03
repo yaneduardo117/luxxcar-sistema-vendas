@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxxCar - Vendas de Automóveis</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        luxx_bg: '#121212',
+                        luxx_card: '#1e1e1e',
+                        luxx_accent: '#facc15'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear,
+        input[type="password"]::-webkit-credentials-auto-fill-button {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+    <nav class="absolute top-0 w-full z-50 p-6 flex justify-between items-center border-b border-white/10 bg-gradient-to-b from-black/80 to-transparent">
+        <a href="/" class="flex items-center space-x-3 hover:opacity-80 transition">
+            <svg class="w-8 h-8 text-luxx_accent" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 2L2 9L16 16L30 9L16 2Z" />
+                <path d="M2 11V23L16 30V18L2 11Z" opacity="0.7"/>
+                <path d="M30 11V23L16 30V18L30 11Z" opacity="0.4"/>
+            </svg>
+            <span class="text-2xl font-bold tracking-widest uppercase">LuxxCar</span>
+        </a>
+
+        <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-300">
+            <a href="/" class="hover:text-white transition">Início</a>
+            <a href="{% url 'catalogo_veiculos' %}" class="hover:text-white transition">Veículos</a>
+
+            <a href="{% url 'sobre' %}" class="hover:text-white transition">Sobre Nós</a>
+            <a href="{% url 'contato' %}" class="hover:text-white transition">Contato</a>
+
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <a href="{% url 'dashboard' %}" class="bg-luxx_accent text-black px-4 py-2 rounded-full hover:bg-yellow-500 transition font-bold ml-4">Dashboard</a>
+
+                    <div x-data="{ open: false }" class="relative ml-4 z-50">
+                        <button @click="open = !open" hx-get="{% url 'notifications_dropdown' %}" hx-target="#notif-container" class="cursor-pointer text-gray-400 hover:text-luxx_accent transition relative focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            {% if notificacoes_nao_lidas and notificacoes_nao_lidas > 0 %}
+                                <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-[#121212]">{{ notificacoes_nao_lidas }}</span>
+                            {% endif %}
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" style="display: none;" class="absolute right-0 mt-2 w-80 bg-luxx_card border border-gray-800 rounded-xl shadow-2xl overflow-hidden transform origin-top-right transition-all">
+                            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-[#121212]">
+                                <h3 class="text-white font-bold text-sm">Notificações</h3>
+                                <button hx-post="{% url 'mark_all_read' %}" @click="document.getElementById('notif-badge').style.display = 'none'" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="text-xs text-luxx_accent hover:underline cursor-pointer">Marcar como lidas</button>
+                            </div>
+                            <div id="notif-container" class="max-h-80 overflow-y-auto">
+                                <div class="p-6 text-center text-xs text-gray-500">Carregando...</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <span class="text-gray-400 ml-4 border-l border-white/20 pl-6">Olá, {{ user.username }}</span>
+
+                <form method="post" action="{% url 'logout' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="hover:text-red-500 transition ml-4 cursor-pointer">Sair</button>
+                </form>
+            {% else %}
+                <div class="border-l border-white/20 pl-6 flex space-x-4">
+                    <a href="{% url 'login' %}" class="hover:text-white transition">Login</a>
+                    <a href="{% url 'cadastro' %}" class="text-luxx_accent hover:text-yellow-500 transition">Criar Conta</a>
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="border-t border-gray-800 bg-[#0a0a0a] pt-16 pb-8 mt-20">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div class="col-span-1 md:col-span-1">
+                <div class="flex items-center space-x-2 mb-6">
+                    <svg class="w-6 h-6 text-luxx_accent" viewBox="0 0 32 32" fill="currentColor">
+                        <path d="M16 2L2 9L16 16L30 9L16 2Z" />
+                        <path d="M2 11V23L16 30V18L2 11Z" opacity="0.7"/>
+                        <path d="M30 11V23L16 30V18L30 11Z" opacity="0.4"/>
+                    </svg>
+                    <span class="text-lg font-bold tracking-widest uppercase text-white">LuxxCar</span>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                    A LuxxCar oferece a mais exclusiva seleção de carros esportivos e de luxo. Transforme o seu sonho em realidade com um atendimento de excelência.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#" class="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-gray-400 hover:bg-luxx_accent hover:text-black transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-gray-400 hover:bg-luxx_accent hover:text-black transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                </div>
+            </div>
+
+            <div class="col-span-1">
+                <h4 class="text-white font-bold mb-4">Endereço</h4>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                    Avenida Nazaré, 1000<br>
+                    Belém, Pará<br>
+                    Brasil, 66035-170
+                </p>
+                <h4 class="text-white font-bold mb-2">Contato</h4>
+                <p class="text-gray-500 text-sm">vendas@luxxcar.com</p>
+                <p class="text-gray-500 text-sm">+55 (91) 99999-9999</p>
+            </div>
+
+            <div class="col-span-1">
+                <h4 class="text-white font-bold mb-4">Páginas</h4>
+                <ul class="space-y-2 text-sm text-gray-500">
+                    <li><a href="/" class="hover:text-white transition">Início</a></li>
+                    <li><a href="{% url 'catalogo_veiculos' %}" class="hover:text-white transition">Lista de Carros</a></li>
+                    <li><a href="{% url 'sobre' %}" class="hover:text-white transition">Sobre Nós</a></li>
+                    <li><a href="{% url 'contato' %}" class="hover:text-white transition">Fale Conosco</a></li>
+                </ul>
+            </div>
+
+            <div class="col-span-1">
+                <h4 class="text-white font-bold mb-4">Termos</h4>
+                <ul class="space-y-2 text-sm text-gray-500">
+                    <li><a href="#" class="hover:text-white transition">Termos de Uso</a></li>
+                    <li><a href="#" class="hover:text-white transition">Política de Privacidade</a></li>
+                    <li><a href="#" class="hover:text-white transition">Condições de Venda</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
+            <p>&copy; 2026 LuxxCar. Todos os direitos reservados.</p>
+            <p class="mt-2 md:mt-0">Desenvolvido com excelência.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

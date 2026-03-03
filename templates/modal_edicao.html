@@ -1,0 +1,53 @@
+{% load widget_tweaks %}
+
+<div x-data="{ modalEditAberto: true }"
+     x-init="$watch('modalEditAberto', value => { if(!value) setTimeout(() => $el.remove(), 300) })">
+
+    <div x-show="modalEditAberto" style="display: none;"
+         x-transition.opacity.duration.300ms
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm">
+
+        <div x-show="modalEditAberto" @click.away="modalEditAberto = false"
+             x-transition.scale.90.duration.300ms
+             class="bg-luxx_card w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-800 p-8 max-h-[90vh] overflow-y-auto transform">
+
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Editar Veículo: {{ car.model_name }}</h2>
+                <button @click="modalEditAberto = false" class="text-gray-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <form hx-post="{% url 'editar_carro' car.id %}"
+                  hx-encoding="multipart/form-data"
+                  class="space-y-4">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for field in form %}
+                    <div class="{% if field.name == 'image' or field.name == 'galeria' or field.name == 'model_name' %}col-span-full{% endif %}">
+                        <label class="block text-sm font-medium text-gray-400 mb-1">{{ field.label }}</label>
+
+                        {% if field.name == 'status' %}
+                            {% render_field field class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-luxx_accent" %}
+                        {% elif field.name == 'image' %}
+                            <p class="text-xs text-gray-500 mb-2">Foto atual: {{ car.image.name }}</p>
+                            {% render_field field class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-luxx_accent file:text-black hover:file:bg-yellow-500 cursor-pointer" %}
+                        {% elif field.name == 'galeria' %}
+                            <p class="text-xs text-gray-500 mb-2">Selecione para substituir as fotos extras atuais</p>
+                            {% render_field field class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-luxx_accent file:text-black hover:file:bg-yellow-500 cursor-pointer" %}
+                        {% else %}
+                            {% render_field field class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-luxx_accent focus:ring-1 focus:ring-luxx_accent" %}
+                        {% endif %}
+
+                        <span class="text-xs text-red-500">{{ field.errors }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" @click="modalEditAberto = false" class="px-6 py-2 rounded-lg border border-gray-700 text-gray-300 hover:bg-gray-800 transition cursor-pointer">Cancelar</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-500 transition cursor-pointer">Atualizar Veículo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

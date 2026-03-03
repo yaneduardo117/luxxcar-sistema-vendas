@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load humanize %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto pt-32 pb-8 px-6" x-data="{ modalAberto: false }">
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Dashboard Executivo</h1>
+            <p class="text-gray-400">Visão geral do estoque, reservas e faturamento.</p>
+        </div>
+        <button @click="modalAberto = true" class="bg-luxx_accent text-black font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition cursor-pointer z-10 relative shadow-[0_0_15px_rgba(250,204,21,0.3)]">
+            + Novo Veículo
+        </button>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-12">
+        <div class="bg-luxx_card p-5 rounded-xl border border-gray-800">
+            <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Estoque</h3>
+            <p class="text-2xl font-bold text-white">{{ total_carros }}</p>
+        </div>
+        <div class="bg-luxx_card p-5 rounded-xl border border-gray-800">
+            <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Disponíveis</h3>
+            <p class="text-2xl font-bold text-blue-400">{{ carros_disponiveis }}</p>
+        </div>
+        <div class="bg-luxx_card p-5 rounded-xl border border-gray-800">
+            <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Reservados</h3>
+            <p class="text-2xl font-bold text-yellow-500">{{ total_reservados }}</p>
+        </div>
+        <div class="bg-luxx_card p-5 rounded-xl border border-gray-800">
+            <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Vendidos</h3>
+            <p class="text-2xl font-bold text-green-500">{{ total_vendidos }}</p>
+        </div>
+        <div class="bg-luxx_card p-5 rounded-xl border border-gray-800">
+            <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Receita Pendente</h3>
+            <p class="text-2xl font-bold text-gray-300">R$ {{ receita_pendente|floatformat:2 }}</p>
+        </div>
+        <div class="bg-luxx_card p-5 rounded-xl border border-luxx_accent/30 bg-gradient-to-br from-luxx_card to-[#2a2400]">
+            <h3 class="text-luxx_accent text-xs font-bold uppercase tracking-wider mb-1">Receita (Aprovada)</h3>
+            <p class="text-2xl font-bold text-white">R$ {{ receita_total|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <div class="mb-12">
+        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-luxx_accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Pedidos e Reservas
+        </h2>
+        <div class="bg-luxx_card rounded-xl border border-gray-800 overflow-hidden shadow-xl">
+            <table class="w-full text-left text-sm text-gray-400">
+                <thead class="bg-[#121212] text-xs uppercase text-gray-300">
+                    <tr>
+                        <th class="px-6 py-4">Pedido</th>
+                        <th class="px-6 py-4">Cliente</th>
+                        <th class="px-6 py-4">Veículo</th>
+                        <th class="px-6 py-4">Valor</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venda in vendas_recentes %}
+                    <tr class="border-b border-gray-800 hover:bg-[#1a1a1a] transition">
+                        <td class="px-6 py-4">
+                            <a href="{% url 'sale_detail' venda.id %}" class="font-bold text-luxx_accent hover:underline">#{{ venda.id }}</a>
+                            <p class="text-[10px] text-gray-500 mt-1">{{ venda.created_at|naturaltime }}</p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-white">{{ venda.customer_name }}</p>
+                            <p class="text-xs text-gray-500">{{ venda.customer_phone }}</p>
+                        </td>
+                        <td class="px-6 py-4">{{ venda.car.brand.name }} {{ venda.car.model_name }}</td>
+                        <td class="px-6 py-4 font-medium text-white">R$ {{ venda.sale_price|floatformat:2 }}</td>
+                        <td class="px-6 py-4">
+                            {% if venda.status == 'PENDING' %}
+                                <span class="bg-yellow-900/50 text-yellow-500 border border-yellow-700 py-1 px-3 rounded-full text-xs font-bold uppercase tracking-wider">Pendente</span>
+                            {% elif venda.status == 'APPROVED' %}
+                                <span class="bg-green-900/50 text-green-400 border border-green-700 py-1 px-3 rounded-full text-xs font-bold uppercase tracking-wider">Aprovado</span>
+                            {% else %}
+                                <span class="bg-red-900/50 text-red-400 border border-red-700 py-1 px-3 rounded-full text-xs font-bold uppercase tracking-wider">Cancelado</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            {% if venda.status == 'PENDING' %}
+                            <div class="flex space-x-2 justify-end">
+                                <button hx-post="{% url 'approve_sale' venda.id %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="bg-green-600 hover:bg-green-500 text-white text-xs font-bold py-1.5 px-3 rounded transition cursor-pointer">Aprovar</button>
+                                <button hx-post="{% url 'cancel_sale' venda.id %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="bg-gray-700 hover:bg-red-600 text-white text-xs font-bold py-1.5 px-3 rounded transition cursor-pointer">Cancelar</button>
+                            </div>
+                            {% else %}
+                                <span class="text-xs text-gray-600">Finalizado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">Nenhuma venda ou reserva registrada ainda.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-luxx_accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            Gerenciamento de Veículos
+        </h2>
+        <div class="bg-luxx_card rounded-xl border border-gray-800 overflow-hidden shadow-xl">
+            <table class="w-full text-left text-sm text-gray-400">
+                <thead class="bg-[#121212] text-xs uppercase text-gray-300">
+                    <tr>
+                        <th class="px-6 py-4">Veículo</th>
+                        <th class="px-6 py-4">Segmento</th>
+                        <th class="px-6 py-4">Preço</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-carros">
+                    {% for car in cars %}
+                    <tr class="border-b border-gray-800 hover:bg-[#1a1a1a] transition" id="car-row-{{ car.id }}">
+                        <td class="px-6 py-4 font-medium text-white flex items-center space-x-3">
+                            {% if car.image %}
+                                <img src="{{ car.image.url }}" class="w-12 h-8 object-cover rounded">
+                            {% endif %}
+                            <span>{{ car.brand.name }} {{ car.model_name }} ({{ car.year|stringformat:"d" }})</span>
+                        </td>
+                        <td class="px-6 py-4">{{ car.get_segment_display|default:"-" }}</td>
+                        <td class="px-6 py-4">R$ {{ car.price|floatformat:2 }}</td>
+                        <td class="px-6 py-4">
+                            {% if car.status == 'AVAILABLE' %}
+                                <span class="bg-blue-900/50 text-blue-400 border border-blue-700 py-1 px-3 rounded-full text-xs font-bold uppercase tracking-wider">Disponível</span>
+                            {% elif car.status == 'RESERVED' %}
+                                <span class="bg-yellow-900/50 text-yellow-500 border border-yellow-700 py-1 px-3 rounded-full text-xs font-bold uppercase tracking-wider">Reservado</span>
+                            {% elif car.status == 'SOLD' %}
+                                <span class="bg-green-900/50 text-green-400 border border-green-700 py-1 px-3 rounded-full text-xs font-bold uppercase tracking-wider">Vendido</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <button hx-get="{% url 'editar_carro' car.id %}"
+                                    hx-target="#container-edicao"
+                                    class="text-blue-400 hover:text-blue-300 transition cursor-pointer font-medium">
+                                Editar
+                            </button>
+                            <button @click="
+                                    Swal.fire({
+                                        title: 'Tem certeza?',
+                                        text: 'Deseja excluir o {{ car.model_name }}?',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#facc15',
+                                        cancelButtonColor: '#d33',
+                                        confirmButtonText: 'Sim, excluir!',
+                                        cancelButtonText: 'Cancelar',
+                                        background: '#1e1e1e',
+                                        color: '#fff'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            htmx.ajax('DELETE', '{% url 'deletar_carro' car.id %}', {target: '#car-row-{{ car.id }}', swap: 'outerHTML'});
+                                        }
+                                    })
+                                "
+                                class="text-red-500 hover:text-red-400 transition cursor-pointer font-medium">
+                                Excluir
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">Nenhum veículo encontrado no estoque.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div x-show="modalAberto" style="display: none;"
+         x-transition.opacity.duration.300ms
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm">
+
+        <div x-show="modalAberto" @click.away="modalAberto = false"
+             x-transition.scale.90.duration.300ms
+             class="bg-luxx_card w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-800 p-8 max-h-[90vh] overflow-y-auto transform">
+
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Adicionar Novo Veículo</h2>
+                <button @click="modalAberto = false" class="text-gray-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <form hx-post="{% url 'criar_carro' %}"
+                  hx-encoding="multipart/form-data"
+                  hx-target="#form-feedback"
+                  class="space-y-4">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for field in form %}
+                    <div class="{% if field.name == 'image' or field.name == 'galeria' or field.name == 'model_name' %}col-span-full{% endif %}">
+                        <label class="block text-sm font-medium text-gray-400 mb-1">{{ field.label }}</label>
+
+                        {% if field.name == 'status' %}
+                            {% render_field field class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-luxx_accent" %}
+                        {% elif field.name == 'image' or field.name == 'galeria' %}
+                            {% render_field field class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-luxx_accent file:text-black hover:file:bg-yellow-500 cursor-pointer" %}
+                        {% else %}
+                            {% render_field field class="w-full bg-[#121212] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-luxx_accent focus:ring-1 focus:ring-luxx_accent" %}
+                        {% endif %}
+
+                        <span class="text-xs text-red-500">{{ field.errors }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div id="form-feedback"></div>
+
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" @click="modalAberto = false" class="px-6 py-2 rounded-lg border border-gray-700 text-gray-300 hover:bg-gray-800 transition cursor-pointer">Cancelar</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-luxx_accent text-black font-bold hover:bg-yellow-500 transition cursor-pointer">Salvar Veículo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="container-edicao"></div>
+</div>
+{% endblock %}

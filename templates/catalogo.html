@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style> main.p-6 { padding: 0 !important; } </style>
+
+<div x-data="{
+        searchQuery: '{{ query|default:'' }}',
+        activeBody: '{{ active_body|default:'Todos' }}',
+        activeSegment: '{{ active_segment|default:'Todos' }}',
+        atualizarVitrine() {
+            this.$nextTick(() => { htmx.trigger('#form-filtros', 'submit'); });
+        }
+    }">
+
+    <form id="form-filtros" hx-get="{% url 'catalogo_veiculos' %}" hx-target="#vitrine-carros" hx-swap="innerHTML" style="display: none;">
+        <input type="hidden" name="q" :value="searchQuery">
+        <input type="hidden" name="body_type" :value="activeBody">
+        <input type="hidden" name="segment" :value="activeSegment">
+    </form>
+
+    <div class="relative w-full h-[40vh] flex flex-col items-center justify-center bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1503376712341-ea456e729a8d?q=80&w=1920&auto=format&fit=crop');">
+        <div class="absolute inset-0 bg-black bg-opacity-70"></div>
+        <div class="relative z-10 w-full max-w-4xl px-6 flex flex-col items-center mt-12 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">Catálogo de Veículos</h1>
+            <p class="text-gray-300 text-lg mb-8 max-w-2xl">Encontre o modelo perfeito em nosso estoque selecionado a dedo.</p>
+
+            <div class="w-full max-w-lg relative flex items-center">
+                <svg class="w-5 h-5 absolute left-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" x-model="searchQuery" @input.debounce.300ms="atualizarVitrine()" placeholder="Buscar por marca ou modelo..." class="w-full bg-[#1e1e1e]/90 border border-gray-700 text-white rounded-full py-4 pl-12 pr-6 focus:outline-none focus:border-luxx_accent transition shadow-2xl">
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b border-gray-800 pb-6">
+            <h2 class="text-xl font-bold text-white">Todos os Veículos</h2>
+
+            <div class="flex flex-wrap gap-3 mt-4 md:mt-0">
+                <select x-model="activeBody" @change="atualizarVitrine()" class="bg-[#121212] border border-gray-700 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-luxx_accent cursor-pointer transition">
+                    <option value="Todos">Qualquer Carroceria</option>
+                    {% for code, name in body_types %}
+                        <option value="{{ code }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+
+                <select x-model="activeSegment" @change="atualizarVitrine()" class="bg-[#121212] border border-gray-700 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-luxx_accent cursor-pointer transition">
+                    <option value="Todos">Qualquer Segmento</option>
+                    {% for code, name in segments %}
+                        <option value="{{ code }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div id="vitrine-carros" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative min-h-[300px]">
+            {% include 'partials/car_grid.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}

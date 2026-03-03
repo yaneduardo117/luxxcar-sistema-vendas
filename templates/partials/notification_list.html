@@ -1,0 +1,13 @@
+{% load humanize %}
+<ul class="divide-y divide-gray-800">
+    {% for notif in notificacoes %}
+    <li class="p-4 hover:bg-[#1a1a1a] transition {% if not notif.is_read %}bg-yellow-900/10 border-l-2 border-luxx_accent{% endif %}">
+        <a href="{% if notif.url %}{{ notif.url }}{% else %}#{% endif %}" class="block">
+            <p class="text-sm text-gray-300 font-medium leading-snug">{{ notif.message }}</p>
+            <span class="text-[10px] text-gray-500 mt-1 block">{{ notif.created_at|naturaltime }}</span>
+        </a>
+    </li>
+    {% empty %}
+    <li class="p-6 text-center text-xs text-gray-500">Nenhuma notificação recente.</li>
+    {% endfor %}
+</ul>
