@@ -69,7 +69,7 @@ O sistema estará disponível em: `http://127.0.0.1:8000/`
 ---
 
 ## 🔐 Credenciais de Acesso (Administrador)
-Para acessar o Painel Admin (`http://127.0.0.1:8000/admin/`) e testar as funcionalidades exclusivas de aprovação de vendas e gestão de estoque:
+Para acessar o Painel Admin (`http://127.0.0.1:8000/admin/`) e testar as funcionalidades:
 
 * **E-mail / Usuário:** `admin123@gmail.com`
 * **Senha:** `admin1357@A`
